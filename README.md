@@ -22,8 +22,8 @@ please run `arg-sample -h`.
 The `pipeline.sh` script has comments throughout explaining what it does, but to summarize:
 1. Creates an output label to be used for all generated files. This is in the format of the name of the provided fasta file followed by the label provided on the command line, separated with an underscore. For example, if the fasta provided was `HLA-B.fa` and the label was `recombrate_100xslower`, the output label would be `HLA-B_recombrate_100xslower`
 2. Creates a new formatted fasta file (named as specified 1) based on the alignment file provided:
-  - Replaces '-' with 'N'
-  - Replaces '*' in labels with '_'
+   - Replaces '-' with 'N'
+   - Replaces '*' in labels with '_'
 3. Makes a new directory (named as specified 1) and changes into that directory
 4. Converts the newly formatted fasta file to a sites file using `fasta2sites.py`
 5. Runs ARGweaver with default parameters unless any parameters are added on the command line. For example, a max time of 2000e3 and a recombination rate of 0.015e-8 would be specified with the following command:  
