@@ -42,5 +42,8 @@ This script is used to generate create separate Newick tree files for each tree 
 The output will be as a file for each tree that exists in the smc file. The files will be found in the same directory as the 
 specified smc file. They are named by the region they are found in, for example: `HLA-B.1000.323_580.newick`. To aggregate all 
 the files, it is recommend to put them in one directory like so:
-  `mkdir HLA-B_trees; mv *.newick HLA-B_trees`
+   `mkdir HLA-B_trees; mv *.newick HLA-B_trees`
 
+##### `fasta2sites.py`
+This script converts aligned fasta files to `.sites` format (see https://github.com/mdrasmus/argweaver). Usage:
+   `python fasta2sites.py <input fasta file> <output sites file>
