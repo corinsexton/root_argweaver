@@ -46,4 +46,8 @@ the files, it is recommend to put them in one directory like so:
 
 ##### `fasta2sites.py`
 This script converts aligned fasta files to `.sites` format (see https://github.com/mdrasmus/argweaver). Usage:
-   `python fasta2sites.py <input fasta file> <output sites file>
+   `python fasta2sites.py <input fasta file> <output sites file>`
+   
+##### `pairwise_parser.R`
+This script calculates the minimum distance matrix across all trees in an smc file. Usage:
+   `Rscript pairwise_parser.R <input smc file> <output tsv matrix>`
