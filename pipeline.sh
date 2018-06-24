@@ -35,7 +35,7 @@ mkdir $output_label
 cd $output_label
 
 # convert aligned fasta to a sites file (used as argweaver input)
-python ../..//fasta2sites.py ../$output_label.fasta $output_label.sites
+python ../fasta2sites.py ../$output_label.fasta $output_label.sites
 echo "finished fasta2sites" > pipeline.log
 ####
 
@@ -59,7 +59,7 @@ echo "finished arg-sample" >> pipeline.log
 #### COMPUTE PAIRWISE DISTANCES AND ADD CORRECT LABELS
 
 SMC_file=$output_label.1000.smc.gz
-Rscript ../..//pairwise_parser.R $SMC_file $output_label.min_dist_matrix.tsv
+Rscript ../pairwise_parser.R $SMC_file $output_label.min_dist_matrix.tsv
 echo "finished pairwise_parser" >> pipeline.log
 
 ####
