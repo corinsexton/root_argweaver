@@ -28,7 +28,7 @@ The `pipeline.sh` script has comments throughout explaining what it does, but to
 4. Converts the newly formatted fasta file to a sites file using `fasta2sites.py`
 5. Runs ARGweaver with default parameters unless any parameters are added on the command line. For example, a max time of 2000e3 and a recombination rate of 0.015e-8 would be specified with the following command:  
      `./pipeline.sh HLA-B.fa maxtime_2000e3_100xslower --maxtime=2000e3 --recombrate=.015e-8`  
-6. R script `pairwise_parser.R` runs to parse the trees from the 1000th iteration smc file. Across all trees in the file, the minimum distance between two nodes is calculated and output in a matrix. which is saved as `output_label.min_dist_matrix.tsv`.
+6. R script `smc_parser.R` runs to parse the trees from the 1000th iteration smc file. Distance matrices from every node to each other node as well as MRCA matrices for all tips are saved in 'treeList.RData' to be used in further analyses.
 7. Makes a new directory to store the smc files (`smc_files_output_label`) and moves all smc files into that directory.
 8. FINISHED.
 
@@ -48,6 +48,10 @@ the files, it is recommend to put them in one directory like so:\
 This script converts aligned fasta files to `.sites` format (see https://github.com/mdrasmus/argweaver). Usage:  
      `python fasta2sites.py <input fasta file> <output sites file>`
    
-##### `pairwise_parser.R`
-This script calculates the minimum distance matrix across all trees in an smc file. Usage:  
-     `Rscript pairwise_parser.R <input smc file> <output tsv matrix>`
+##### `smc_parser.R`
+This script creates 'treeList.RData' which holds distance and MRCA matrices for all trees in the 1000th iteration smc file. Usage:  
+     `Rscript smc_parser.R <input smc file> <input sites file>`
+
+##### `get_pairwise_information.R`
+This script uses 'treeList.Rdata' to query all trees for information of a specific 2-allele relationship. It outputs a tab-separated file with each row containing the start and stop regions of a tree, the number of variant sites in that tree's region, the distance between the two alleles in that tree, and the MRCA node number for the two alleles in that tree. Usage:  
+     `Rscript smcParser.R [opt: path to treeList.RData] <haplotype 1> <haplotype 2> <output file name>`

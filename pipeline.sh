@@ -59,8 +59,9 @@ echo "finished arg-sample" >> pipeline.log
 #### COMPUTE PAIRWISE DISTANCES AND ADD CORRECT LABELS
 
 SMC_file=$output_label.1000.smc.gz
-Rscript ../pairwise_parser.R $SMC_file $output_label.min_dist_matrix.tsv
-echo "finished pairwise_parser" >> pipeline.log
+#Rscript ../pairwise_parser.R $SMC_file $output_label.min_dist_matrix.tsv
+Rscript ../smc_parser.R $SMC_file $output_label.sites
+echo "finished smc_parser" >> pipeline.log
 
 ####
 
@@ -72,4 +73,4 @@ mv *smc.gz smc_files_$output_label
 
 ####
 
-echo "FINISHED! Output file is found at $output_label.min_dist_matrix.tsv" >> pipeline.log
+echo "FINISHED! Data file is found at treeList.RData" >> pipeline.log
