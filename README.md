@@ -27,7 +27,7 @@ The `pipeline.sh` script has comments throughout explaining what it does, but to
 3. Makes a new directory (named as specified 1) and changes into that directory
 4. Converts the newly formatted fasta file to a sites file using `fasta2sites.py`
 5. Runs ARGweaver with default parameters unless any parameters are added on the command line. For example, a max time of 2000e3 and a recombination rate of 0.015e-8 would be specified with the following command:  
-     `./pipeline.sh HLA-B.fa maxtime_2000e3_100xslower --maxtime=2000e3 --recombrate=.015e-8`  
+     `./pipeline.sh HLA-B.fa maxtime_2000e3_100xslower --maxtime 2000e3 --recombrate .015e-8`  
 6. R script `smc_parser.R` runs to parse the trees from the 1000th iteration smc file. Distance matrices from every node to each other node as well as MRCA matrices for all tips are saved in 'treeList.RData' to be used in further analyses.
 7. Makes a new directory to store the smc files (`smc_files_output_label`) and moves all smc files into that directory.
 8. FINISHED.
