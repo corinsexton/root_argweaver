@@ -2,7 +2,6 @@
 
 suppressWarnings(library(ape, quietly = T))
 suppressWarnings(library(readr, quietly = T))
-suppressWarnings(library(tibble, quietly = T))
 
 #' Get Pairwise Information
 #'
