@@ -1,0 +1,166 @@
+#!/usr/bin/Rscript
+
+suppressWarnings(library(ape, quietly = T))
+suppressWarnings(library(readr, quietly = T))
+
+
+# A haplotype's-eye-view script, which for an input-specified haplotype i of an input-specified locus, outputs a file comprising a row for each haplotype j that includes
+# . j's haplotype id
+# . j's taxon
+# . the shortest* distance separating haplotypes i and j, as found among all trees in the run
+# . the segment(s) of the locus where that shortest* distance was inferred,including (as subfields in a delimited list) 
+#     . the start_end of each such segment in question
+#     . the node id of the oldest node on that shortest-found path between the two haplotypes in that given segment;
+#     . the sites count within that segment
+# . the longest* distance separating haplotypes i and j among all trees in the run
+# . the segment(s) of the locus where that longest* distance was inferred, including (as subfields in a delimited list)
+#     . the start_end of each such segment in question
+#     . the node id of the oldest node on that longest-found path between the two haplotypes in that given segment
+#     . the count of variable (or otherwise 'informative', if defined better by ARGweaver) sites within that segment
+
+# *: where 'shortest' can be restricted to >= an optional --min_split parameter, and 'longest' can be restricted to <= an optional --max_split parameter
+
+
+
+
+#' Get Single Allele Information
+#'
+#' @param treeList Generated previously. List containing all trees for a smc file.
+#' @param hap name of allele (as found in smc file)
+#' @param labels labels provided by smcfile
+#' @param min_split Number specifying minimum allowable time for a MRCA to occur
+#' @param max_split Number specifying maximum allowable time for a MRCA to occur
+#'
+#' @return data frame, describes for all other alleles 1. allele id, 2. taxon of allele, 3. shortest distance found to that allele, 4. start of region for tree with the shortest distance, 5. end of region for tree with the shortest distance, 6. number of variant sites in the region for the shortest distance tree, 7. mrca node in shortest distance tree, 8. maximum distance found to that allele, 9. start of region for tree with the maximum distance, 10. end of region for tree with the maximum distance, 11. number of variant sites in the region for the maximum distance tree, 12. mrca node in maximum distance tree
+#' @export
+#'
+#' @examples
+#' df <- getSingleAlleleInformation(treeList, "DRB1_12.01.01.05", labels)
+getSingleAlleleInformation <- function(treeList, hap, labels, min_split = 0, max_split = Inf) {
+  
+  if (!(hap %in% labels)) {
+    cat("Please enter a valid haplotype name. Options are: \n\n")
+    cat(labels, sep="\t")
+    cat("\n")
+    return(FALSE)
+  }
+  
+  # from "PatrNDRB1_02.09" -> "121"
+  hap_num1 <- which(labels == hap)
+  other_haps <- labels[which(labels != hap)]
+  
+  total_df <- tibble::tibble(allele_id = character(),
+                             taxon = character(),
+                             shortest_dist = numeric(),
+                             shortest_dist_region_start = numeric(),
+                             shortest_dist_region_end = numeric(),
+                             shortest_dist_num_sites_in_region = numeric(),
+                             shortest_mrca = numeric(),
+                             longest_dist = numeric(),
+                             longest_dist_region_start = numeric(),
+                             longest_dist_region_end = numeric(),
+                             longest_dist_num_sites_in_region = numeric(),
+                             longest_mrca = numeric()
+                             )
+
+  for (i in 1:length(other_haps)) {
+    
+    hap_num2 <- which(labels == other_haps[i])
+    
+    dist_mrca <- sapply(treeList,function(l) {
+      
+      # from 121 -> 24 (per tree ordering) (0 indexed in labels)
+      h1 <- which(l$node_label_ordering == as.character(hap_num1 - 1))
+      h2 <- which(l$node_label_ordering == as.character(hap_num2 - 1))
+      
+      list(start_of_region = l$start_region,
+           end_of_region = l$end_region,
+           num_sites_in_region = l$num_sites_in_region,
+           distance_between = l$node_inf$distances[h1,h2],
+           mrca = l$node_inf$mrca_matrix[h1,h2]
+           
+      )
+    })
+    
+    x <- data.frame(t(dist_mrca))
+    x$start_of_region <- as.numeric(x$start_of_region)
+    x$end_of_region <- as.numeric(x$end_of_region)
+    x$num_sites_in_region <- as.numeric(x$num_sites_in_region)
+    x$distance_between <- as.numeric(x$distance_between)
+    x$mrca <- as.numeric(x$mrca)
+    
+    min_index <- which.min(subset(x, distance_between >= min_split)$distance_between) # TIE BREAKERS? (only 20 unique)
+    max_index <- which.max(subset(x, distance_between <= max_split)$distance_between) # TIE BREAKERS?
+    
+    if (grepl('gogo', other_haps[i], ignore.case = T)) {
+      taxon <- 'Gorilla gorilla'
+    } else if (grepl('popy', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pongo pygmaeus'
+    } else if (grepl('patr', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pan troglodytes'
+    } else if (grepl('poab', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pongo abelii'
+    } else if (grepl('papa', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pan paniscus'
+    } else {
+      taxon <- 'Homo sapiens'
+    }
+
+    total_df[i,] <- c(other_haps[i],
+                     taxon,
+                     x$distance_between[min_index],
+                     x$start_of_region[min_index],
+                     x$end_of_region[min_index],
+                     x$num_sites_in_region[min_index],
+                     x$mrca[min_index],
+                     x$distance_between[max_index],
+                     x$start_of_region[max_index],
+                     x$end_of_region[max_index],
+                     x$num_sites_in_region[max_index],
+                     x$mrca[max_index])
+  }
+
+  total_df
+}
+
+###########
+
+suppressWarnings(library(argparse, quietly=TRUE))
+
+# Create a parser
+parser <- ArgumentParser(description = "Single Allele Information Parser")
+
+# Add command line arguments
+parser$add_argument("allele", nargs = 1, help="Allele Name")
+parser$add_argument("output", help="output file")
+
+parser$add_argument("--min_split", help="Number specifying minimum allowable time for a MRCA to occur")
+parser$add_argument("--max_split", help="Number specifying maximum allowable time for a MRCA to occur")
+
+parser$add_argument("--rdata", action="store_true",
+                    help="path to treeList.RData [defaults to ./treeList.RData]",
+                    default='./treeList.RData')
+
+argv <- parser$parse_args()
+
+load(argv$rdata)
+
+if (!is.null(argv$min_split)) {
+  min_split = as.numeric(argv$min_split)
+} else {
+  min_split = 0
+}
+
+if (!is.null(argv$max_split)) {
+  max_split = as.numeric(argv$max_split)
+} else {
+  max_split = Inf
+}
+
+df <- getSingleAlleleInformation(treeList, argv$allele, labels, min_split, max_split)
+df <- getSingleAlleleInformation(treeList, hap, labels, min_split, max_split)
+
+if (class(df) == "data.frame")  write_tsv(df, path = argv$output)
+
+
+
