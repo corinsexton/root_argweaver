@@ -49,7 +49,6 @@ getSingleAlleleInformation <- function(treeList, hap, labels, min_split = 0, max
   hap_num1 <- which(labels == hap)
   other_haps <- labels[which(labels != hap)]
   
-  
   if (grepl('gogo', hap, ignore.case = T)) {
     hap1_taxon <- 'Gorilla gorilla'
   } else if (grepl('popy', hap, ignore.case = T)) {
@@ -103,6 +102,9 @@ getSingleAlleleInformation <- function(treeList, hap, labels, min_split = 0, max
     x$num_sites_in_region <- as.numeric(x$num_sites_in_region)
     x$distance_between <- as.numeric(x$distance_between)
     x$mrca <- as.numeric(x$mrca)
+    
+    min_index <- which.min(subset(x, distance_between >= min_split)$distance_between) # TIE BREAKERS? (only 20 unique)
+    max_index <- which.max(subset(x, distance_between <= max_split)$distance_between) # TIE BREAKERS?
     
     if (grepl('gogo', other_haps[i], ignore.case = T)) {
       taxon <- 'Gorilla gorilla'
