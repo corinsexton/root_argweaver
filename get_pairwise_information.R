@@ -10,7 +10,7 @@ suppressWarnings(library(readr, quietly = T))
 #' @param hap2 a string for a haplotype
 #' @param labels labels provided by smcfile
 #'
-#' @return dataframe, describes for all regions 1. start of region, 2. end of region, 3. number of variant sites in a region, 4. distance between the two haplotypes, and 5. the mrca node id.
+#' @return data frame, describes for all regions 1. start of region, 2. end of region, 3. number of variant sites in a region, 4. distance between the two haplotypes, and 5. the mrca node id.
 #' @export
 #'
 #' @examples
@@ -27,24 +27,21 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
     return(FALSE)
   }
   
-  # from "PatrNDRB1_02.09" -> 121"
+  # from "PatrNDRB1_02.09" -> "121"
   hap_num1 <- which(labels == hap1)
   hap_num2 <- which(labels == hap2)
   
   dist_mrca <- sapply(treeList,function(l) {
     
-    # from 121 -> 24 (per tree ordering)
-    h1 <- which(l$node_label_ordering == as.character(hap_num1))
-    h2 <- which(l$node_label_ordering == as.character(hap_num2))
+    # from 121 -> 24 (per tree ordering) (0 indexed in labels)
+    h1 <- which(l$node_label_ordering == as.character(hap_num1 - 1))
+    h2 <- which(l$node_label_ordering == as.character(hap_num2 - 1))
     
     list(start_of_region = l$start_region,
          end_of_region = l$end_region,
          num_sites_in_region = l$num_sites_in_region,
          distance_between = l$node_inf$distances[h1,h2],
-         mrca = l$node_inf$mrca_matrix[h1,h2],
-         distance_from_h1_to_mrca = l$node_inf$mrca_matrix[h1,l$node_inf$mrca_matrix[h1,h2]],
-         distance_from_h2_to_mrca = l$node_inf$mrca_matrix[h2,l$node_inf$mrca_matrix[h1,h2]]
-         
+         mrca = l$node_inf$mrca_matrix[h1,h2]
     )
   })
   
@@ -54,8 +51,6 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
   x$num_sites_in_region <- as.numeric(x$num_sites_in_region)
   x$distance_between <- as.numeric(x$distance_between)
   x$mrca <- as.numeric(x$mrca)
-  x$distance_from_h1_to_mrca <- as.numeric(x$distance_between)
-  x$distance_from_h2_to_mrca <- as.numeric(x$distance_between)
   
   x
 }
@@ -65,7 +60,7 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
 suppressWarnings(library(argparse, quietly=TRUE))
 
 # Create a parser
-parser <- ArgumentParser(description = "ARGweaver Output Parser")
+parser <- ArgumentParser(description = "Pairwise Allele Information Parser")
 
 # Add command line arguments
 parser$add_argument("haplotype1", nargs = 1, help="Haplotype 1")
