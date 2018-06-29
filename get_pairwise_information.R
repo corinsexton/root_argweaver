@@ -41,7 +41,10 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
          end_of_region = l$end_region,
          num_sites_in_region = l$num_sites_in_region,
          distance_between = l$node_inf$distances[h1,h2],
-         mrca = l$node_inf$mrca_matrix[h1,h2]
+         mrca = l$node_inf$mrca_matrix[h1,h2],
+         distance_from_h1_to_mrca = l$node_inf$mrca_matrix[h1,l$node_inf$mrca_matrix[h1,h2]],
+         distance_from_h2_to_mrca = l$node_inf$mrca_matrix[h2,l$node_inf$mrca_matrix[h1,h2]]
+         
     )
   })
   
@@ -51,6 +54,8 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
   x$num_sites_in_region <- as.numeric(x$num_sites_in_region)
   x$distance_between <- as.numeric(x$distance_between)
   x$mrca <- as.numeric(x$mrca)
+  x$distance_from_h1_to_mrca <- as.numeric(x$distance_between)
+  x$distance_from_h2_to_mrca <- as.numeric(x$distance_between)
   
   x
 }
