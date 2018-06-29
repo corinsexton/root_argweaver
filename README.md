@@ -54,4 +54,22 @@ This script creates 'treeList.RData' which holds distance and MRCA matrices for 
 
 ##### `get_pairwise_information.R`
 This script uses 'treeList.Rdata' to query all trees for information of a specific 2-allele relationship. It outputs a tab-separated file with each row containing the start and stop regions of a tree, the number of variant sites in that tree's region, the distance between the two alleles in that tree, and the MRCA node number for the two alleles in that tree. Usage:  
-     `Rscript smcParser.R [opt: path to treeList.RData] <haplotype 1> <haplotype 2> <output file name>`
+     `Rscript get_pairwise_information.R [opt: path to treeList.RData] <haplotype 1> <haplotype 2> <output file name>`
+     
+##### `get_pairwise_information.R`
+This script uses 'treeList.Rdata' to query all trees for information for one allele in relation to all other alleles. It outputs a tab-separated file with each row containing for all other alleles :
+  1. allele id, 
+  2. taxon of allele, 
+  3. shortest distance found to that allele, 
+  4. start of region for tree with the shortest distance, 
+  5. end of region for tree with the shortest distance, 
+  6. number of variant sites in the region for the shortest distance tree, 
+  7. mrca node in shortest distance tree, 
+  8. maximum distance found to that allele, 
+  9. start of region for tree with the maximum distance, 
+  10. end of region for tree with the maximum distance, 
+  11. number of variant sites in the region for the maximum distance tree, 
+  12. mrca node in maximum distance tree
+The min_split and max_split parameters specify limits to the most recent and most ancient a MRCA can be for a pair of alleles. By default, these limits only apply to allele relationships between different species, but the --all_species parameter can be set to true to apply the limits to intra species alleles as well.
+  Usage:  
+     `Rscript get_single_allele_information.R [opt: path to treeList.RData] [opt: --max_split #] [opt: --min_split #] [opt: -a, --all_species defaults:False] <allele name> <output file name>`
