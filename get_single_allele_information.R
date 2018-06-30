@@ -50,21 +50,22 @@ getSingleAlleleInformation <- function(treeList, hap, labels, min_split = 0, max
   other_haps <- labels[which(labels != hap)]
   
   if (grepl('gogo', hap, ignore.case = T)) {
-    hap1_taxon <- 'Gorilla gorilla'
+    hap1_taxon <- 'Gorilla_gorilla'
   } else if (grepl('popy', hap, ignore.case = T)) {
-    hap1_taxon <- 'Pongo pygmaeus'
+    hap1_taxon <- 'Pongo_pygmaeus'
   } else if (grepl('patr', hap, ignore.case = T)) {
-    hap1_taxon <- 'Pan troglodytes'
+    hap1_taxon <- 'Pan_troglodytes'
   } else if (grepl('poab', hap, ignore.case = T)) {
-    hap1_taxon <- 'Pongo abelii'
+    hap1_taxon <- 'Pongo_abelii'
   } else if (grepl('papa', hap, ignore.case = T)) {
-    hap1_taxon <- 'Pan paniscus'
+    hap1_taxon <- 'Pan_paniscus'
   } else {
-    hap1_taxon <- 'Homo sapiens'
+    hap1_taxon <- 'Homo_sapiens'
   }
   
-  total_df <- tibble::tibble(allele_id = character(),
-                             taxon = character(),
+  total_df <- tibble::tibble(allele_1_id = character(),
+                             allele_2_id = character(),
+                             taxon_allele_2 = character(),
                              shortest_dist = numeric(),
                              shortest_dist_region_start = numeric(),
                              shortest_dist_region_end = numeric(),
@@ -103,30 +104,34 @@ getSingleAlleleInformation <- function(treeList, hap, labels, min_split = 0, max
     x$distance_between <- as.numeric(x$distance_between)
     x$mrca <- as.numeric(x$mrca)
     
+    
+    if (grepl('gogo', other_haps[i], ignore.case = T)) {
+      taxon <- 'Gorilla_gorilla'
+    } else if (grepl('popy', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pongo_pygmaeus'
+    } else if (grepl('patr', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pan_troglodytes'
+    } else if (grepl('poab', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pongo_abelii'
+    } else if (grepl('papa', other_haps[i], ignore.case = T)) {
+      taxon <- 'Pan_paniscus'
+    } else {
+      taxon <- 'Homo_sapiens'
+    }
+    
+    if (class(min_split) == 'data-frame') {
+      min_split <- min_split[which(min_split[,1] == hap1_taxon), which(colnames(min_split) == hap1_taxon)]
+    }
+    
+    if (class(max_split) == 'data-frame') {
+      max_split <- max_split[which(max_split[,1] == hap1_taxon), which(colnames(max_split) == hap1_taxon)]
+    }
+    
     min_index <- which.min(subset(x, distance_between >= min_split)$distance_between) # TIE BREAKERS? (only 20 unique)
     max_index <- which.max(subset(x, distance_between <= max_split)$distance_between) # TIE BREAKERS?
     
-    if (grepl('gogo', other_haps[i], ignore.case = T)) {
-      taxon <- 'Gorilla gorilla'
-    } else if (grepl('popy', other_haps[i], ignore.case = T)) {
-      taxon <- 'Pongo pygmaeus'
-    } else if (grepl('patr', other_haps[i], ignore.case = T)) {
-      taxon <- 'Pan troglodytes'
-    } else if (grepl('poab', other_haps[i], ignore.case = T)) {
-      taxon <- 'Pongo abelii'
-    } else if (grepl('papa', other_haps[i], ignore.case = T)) {
-      taxon <- 'Pan paniscus'
-    } else {
-      taxon <- 'Homo sapiens'
-    }
-    
-    if (!all_species & hap1_taxon == taxon) {
-      minimum_dist <- x
-      maximum_dist <- x
-    } else {
-      minimum_dist <- subset(x, distance_between >= min_split)
-      maximum_dist <- subset(x, distance_between <= max_split)
-    }
+    minimum_dist <- subset(x, distance_between >= min_split)
+    maximum_dist <- subset(x, distance_between <= max_split)
     
     if (nrow(minimum_dist) == 0) {
       cat("WARNING: Minimum split time specified is too ancient (too high), no MRCA found for: ", hap, " and ", other_haps[i], '\n')
@@ -154,7 +159,7 @@ getSingleAlleleInformation <- function(treeList, hap, labels, min_split = 0, max
                     maximum_dist$mrca[max_index])
     }
 
-    total_df[i,] <- c(other_haps[i],
+    total_df[i,] <- c(hap, other_haps[i],
                      taxon, min_data, max_data)
   }
 
@@ -172,8 +177,10 @@ parser <- ArgumentParser(description = "Single Allele Information Parser")
 parser$add_argument("allele", nargs = 1, help="Allele Name")
 parser$add_argument("output", help="output file")
 
-parser$add_argument("--min_split", help="Number specifying minimum allowable time for a MRCA to occur")
-parser$add_argument("--max_split", help="Number specifying maximum allowable time for a MRCA to occur")
+parser$add_argument("--min_split", help="Matrix specifying minimum allowable
+                                         time for a MRCA to occur (tab separated)")
+parser$add_argument("--max_split", help="Matrix specifying maximum allowable
+                                         time for a MRCA to occur (tab separated)")
 parser$add_argument("-a", "--all_species", default=FALSE,
                     help="enforce split time parameters for all species (including the same species as the allele in question) [default: False]")
 parser$add_argument("--rdata", action="store_true",
@@ -185,13 +192,13 @@ argv <- parser$parse_args()
 load(argv$rdata)
 
 if (!is.null(argv$min_split)) {
-  min_split = as.numeric(argv$min_split)
+  min_split <- read_table(min_split)
 } else {
   min_split = 0
 }
 
 if (!is.null(argv$max_split)) {
-  max_split = as.numeric(argv$max_split)
+  max_split <- read_table(max_split)
 } else {
   max_split = Inf
 }

@@ -10,7 +10,7 @@ suppressWarnings(library(readr, quietly = T))
 #' @param hap2 a string for a haplotype
 #' @param labels labels provided by smcfile
 #'
-#' @return data frame, describes for all regions 1. start of region, 2. end of region, 3. number of variant sites in a region, 4. distance between the two haplotypes, and 5. the mrca node id.
+#' @return data frame, describes for all regions 1. haplotype name 1, 2. haplotype name 2, 3. start of region, 4. end of region, 5. number of variant sites in a region, 6. distance between the two haplotypes, and 7. the mrca node id.
 #' @export
 #'
 #' @examples
@@ -37,7 +37,7 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
     h1 <- which(l$node_label_ordering == as.character(hap_num1 - 1))
     h2 <- which(l$node_label_ordering == as.character(hap_num2 - 1))
     
-    list(start_of_region = l$start_region,
+    list(haplotype_1 = hap1, haplotype_2 = hap2, start_of_region = l$start_region,
          end_of_region = l$end_region,
          num_sites_in_region = l$num_sites_in_region,
          distance_between = l$node_inf$distances[h1,h2],
@@ -51,6 +51,8 @@ getPairwiseInformation <- function(treeList, hap1, hap2, labels) {
   x$num_sites_in_region <- as.numeric(x$num_sites_in_region)
   x$distance_between <- as.numeric(x$distance_between)
   x$mrca <- as.numeric(x$mrca)
+  x$haplotype_1 <- as.character(x$haplotype_1)
+  x$haplotype_2 <- as.character(x$haplotype_2)
   
   x
 }
