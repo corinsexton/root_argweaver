@@ -1,7 +1,7 @@
-.	Gorilla_gorilla	Homo_sapiens	Pan_troglodytes	Pan_paniscus	Pongo_abelii	Pongo_pygmaeus
-Gorilla_gorilla	0	1000	100	100	100	100
-Homo_sapiens	1000	0	1000	1000	1000	1000
-Pan_troglodytes	100	1000	0	100	100	100
-Pan_paniscus	100	1000	100	0	100	100
-Pongo_abelii	100	1000	100	100	0	100	
-Pongo_pygmaeus	100	1000	100	100	100	0
+.	Gogo	human	Patr	Papa	Poab	Popy
+Gogo	0	1000	100	100	100	100
+human	1000	0	1000	1000	1000	1000
+Patr	100	1000	0	100	100	100
+Papa	100	1000	100	0	100	100
+Poab	100	1000	100	100	0	100	
+Popy	100	1000	100	100	100	0
