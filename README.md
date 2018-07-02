@@ -58,18 +58,21 @@ This script uses 'treeList.Rdata' to query all trees for information of a specif
      
 ##### `get_pairwise_information.R`
 This script uses 'treeList.Rdata' to query all trees for information for one allele in relation to all other alleles. It outputs a tab-separated file with each row containing for all other alleles :
-  1. allele id, 
-  2. taxon of allele, 
-  3. shortest distance found to that allele, 
-  4. start of region for tree with the shortest distance, 
-  5. end of region for tree with the shortest distance, 
-  6. number of variant sites in the region for the shortest distance tree, 
-  7. mrca node in shortest distance tree, 
-  8. maximum distance found to that allele, 
-  9. start of region for tree with the maximum distance, 
-  10. end of region for tree with the maximum distance, 
-  11. number of variant sites in the region for the maximum distance tree, 
-  12. mrca node in maximum distance tree
-The min_split and max_split parameters specify limits to the most recent and most ancient a MRCA can be for a pair of alleles. By default, these limits only apply to allele relationships between different species, but the --all_species parameter can be set to true to apply the limits to intra species alleles as well.
+  1. first allele id
+  2. second allele id
+  3. first allele deme
+  4. second allele deme
+  5. shortest distance found to second allele
+  6. start of region for tree with the shortest distance
+  7. end of region for tree with the shortest distance
+  8. number of variant sites in the region for the shortest distance tree
+  9. mrca node in shortest distance tree
+  10. maximum distance found to that allele
+  11. start of region for tree with the maximum distance
+  12. end of region for tree with the maximum distance
+  13. number of variant sites in the region for the maximum distance tree
+  14. mrca node in maximum distance tree
+  
+The min_split and max_split parameters specify limits to the most recent and most ancient a MRCA can be for a pair of alleles. These files should be in tab separated format with the deme identifiers along the rows and columns. The first column name should have a placeholder (such as . or ,). The rest of the columns should be named with the same identifiers that are present in the fasta sequence file (case insensitive). For example, popy, gogo, patr etc. Any sequences in the fasta file that lack an identifier will be classified as human.
   Usage:  
-     `Rscript get_single_allele_information.R [opt: path to treeList.RData] [opt: --max_split #] [opt: --min_split #] [opt: -a, --all_species defaults:False] <allele name> <output file name>`
+     `Rscript get_single_allele_information.R [opt: path to treeList.RData] [opt: --max_split path-to-tsv] [opt: --min_split path-to-tsv] <allele name> <output file name>`
