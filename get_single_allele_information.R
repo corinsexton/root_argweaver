@@ -74,8 +74,7 @@ getSingleAlleleInformation <- function(treeList, allele, labels, min_split = 0, 
     dist_mrca_df$num_sites_in_region <- as.numeric(dist_mrca_df$num_sites_in_region)
     dist_mrca_df$distance_between <- as.numeric(dist_mrca_df$distance_between)
     dist_mrca_df$mrca <- as.numeric(dist_mrca_df$mrca)
-<<<<<<< HEAD
-    
+
     allele2_deme <- getDemeIdentifier(min_split, allele2)
     
     # get min and max distances according to deme
@@ -109,8 +108,7 @@ getSingleAlleleInformation <- function(treeList, allele, labels, min_split = 0, 
                     paste(max_list[[4]], collapse = ','),
                     paste(max_list[[5]], collapse = ',')
                     )
-=======
-    
+
     allele2_deme <- getDemeIdentifier(min_split, allele2)
     
     # get min and max distances according to deme
@@ -223,13 +221,11 @@ getDistancePerAllele <- function(subsetted_matrix, limit_func) {
       data_sites[[j]] <- subsetted_matrix$num_sites_in_region[index]
       data_mrca[[j]] <- subsetted_matrix$mrca[index]
     }
->>>>>>> 3c78d63f31b1bdc0b5ae5ed9dca572a4da72f36f
   }
   return(list(data_dist,data_start,data_end,data_sites,data_mrca))
 }
 
 
-<<<<<<< HEAD
 #' Get Deme Indetifier (internal)
 #'
 #' @param min_split either 1) data frame containing identical row and column names for deme identifiers OR 2) an integer to specify min split limits for all species
@@ -269,46 +265,8 @@ getDemeIdentifier <- function(min_split, allele) {
 }
 
 
-#' Get Distance Per Allele (internal)
-#'
-#' @param subsetted_matrix matrix for all the trees for one allele pair
-#' @param limit_func either max or min
-#'
-#' @return a list with either all max or all min statistics
-#' @export
-#'
-#' @examples
-getDistancePerAllele <- function(subsetted_matrix, limit_func) {
-  if (nrow(subsetted_matrix) == 0) {
-    data_dist[[j]] <- 'NA'
-    data_start[[j]] <- 'NA'
-    data_end[[j]] <- 'NA'
-    data_sites[[j]] <- 'NA'
-    data_mrca[[j]] <- 'NA'
-  } else {
-    dist<- limit_func(subsetted_matrix$distance_between)
-    indices <- which(subsetted_matrix$distance_between == dist)
-    
-    data_start <- list()
-    data_end <- list()
-    data_sites <- list()
-    data_mrca <- list()
-    for (j in 1:length(indices)) {
-      index <- indices[j]
-      
-      data_dist <- subsetted_matrix$distance_between[index]
-      data_start[[j]] <- subsetted_matrix$start_of_region[index]
-      data_end[[j]] <- subsetted_matrix$end_of_region[index]
-      data_sites[[j]] <- subsetted_matrix$num_sites_in_region[index]
-      data_mrca[[j]] <- subsetted_matrix$mrca[index]
-    }
-  }
-  return(list(data_dist,data_start,data_end,data_sites,data_mrca))
-}
 
 
-=======
->>>>>>> 3c78d63f31b1bdc0b5ae5ed9dca572a4da72f36f
 #' Get Split Time
 #'
 #' @param split_data matrix containing split times or a numeric
