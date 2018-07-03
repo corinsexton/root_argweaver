@@ -30,35 +30,10 @@ getSingleAlleleInformation <- function(treeList, allele, labels, min_split = 0, 
   allele_num1 <- which(labels == allele)
   other_alleles <- labels[which(labels != allele)]
   
-  if (class(min_split) == 'data.frame') {
-    demes_available <- colnames(min_split)[2:length(colnames(min_split))]
-    allele1_deme <- 'human'
-    for (deme in demes_available) {
-      if (grepl(tolower(deme), allele, ignore.case = T)) {
-        allele1_deme <- tolower(deme)
-        break
-      }
-    }
-  } else {
-    if (grepl('gogo', allele, ignore.case = T)) {
-      allele1_deme <- 'gogo'
-    } else if (grepl('popy', allele, ignore.case = T)) {
-      allele1_deme <- 'popy'
-    } else if (grepl('patr', allele, ignore.case = T)) {
-      allele1_deme <- 'patr'
-    } else if (grepl('poab', allele, ignore.case = T)) {
-      allele1_deme <- 'poab'
-    } else if (grepl('papa', allele, ignore.case = T)) {
-      allele1_deme <- 'papa'
-    } else {
-      allele1_deme <- 'human'
-    }
-  }
+  allele1_deme <- getDemeIdentifier(min_split, allele)
   
-  total_df <- tibble::tibble(allele_1_id = character(),
-                             allele_2_id = character(),
-                             deme_allele_1 = character(),
-                             deme_allele_2 = character(),
+  total_df <- tibble::tibble(allele_1_id = character(), allele_2_id = character(),
+                             deme_allele_1 = character(), deme_allele_2 = character(),
                              shortest_dist = numeric(),
                              shortest_dist_region_start = numeric(),
                              shortest_dist_region_end = numeric(),
@@ -73,8 +48,10 @@ getSingleAlleleInformation <- function(treeList, allele, labels, min_split = 0, 
 
   for (i in 1:length(other_alleles)) {
     
-    allele_num2 <- which(labels == other_alleles[i])
+    allele2 <- other_alleles[i]
+    allele_num2 <- which(labels == allele2)
     
+    # pull data for all trees
     dist_mrca <- sapply(treeList,function(l) {
       
       # from 121 -> 24 (per tree ordering) (0 indexed in labels)
@@ -90,130 +67,149 @@ getSingleAlleleInformation <- function(treeList, allele, labels, min_split = 0, 
       )
     })
     
-    x <- data.frame(t(dist_mrca))
-    x$start_of_region <- as.numeric(x$start_of_region)
-    x$end_of_region <- as.numeric(x$end_of_region)
-    x$num_sites_in_region <- as.numeric(x$num_sites_in_region)
-    x$distance_between <- as.numeric(x$distance_between)
-    x$mrca <- as.numeric(x$mrca)
+    # format all trees data with proper types
+    dist_mrca_df <- data.frame(t(dist_mrca))
+    dist_mrca_df$start_of_region <- as.numeric(dist_mrca_df$start_of_region)
+    dist_mrca_df$end_of_region <- as.numeric(dist_mrca_df$end_of_region)
+    dist_mrca_df$num_sites_in_region <- as.numeric(dist_mrca_df$num_sites_in_region)
+    dist_mrca_df$distance_between <- as.numeric(dist_mrca_df$distance_between)
+    dist_mrca_df$mrca <- as.numeric(dist_mrca_df$mrca)
     
-    allele2 <- other_alleles[i]
+    allele2_deme <- getDemeIdentifier(min_split, allele2)
     
-    if (class(min_split) == 'data.frame') {
-      allele2_deme <- 'human'
-      
-      for (deme in demes_available) {
-        if (grepl(tolower(deme), allele2, ignore.case = T)) {
-          allele2_deme <- tolower(deme)
-          break
-        }
-      }
-    } else {
-        if (grepl('gogo', allele2, ignore.case = T)) {
-          allele2_deme <- 'gogo'
-        } else if (grepl('popy', allele2, ignore.case = T)) {
-          allele2_deme <- 'popy'
-        } else if (grepl('patr', allele2, ignore.case = T)) {
-          allele2_deme <- 'patr'
-        } else if (grepl('poab', allele2, ignore.case = T)) {
-          allele2_deme <- 'poab'
-        } else if (grepl('papa', allele2, ignore.case = T)) {
-          allele2_deme <- 'papa'
-        } else {
-          allele2_deme <- 'human'
-        }
-    }
-    
-    if (class(min_split) == 'data.frame') {
-      colnames(min_split) <- lapply(colnames(min_split),tolower)
-      min_split[,1] <- sapply(min_split[,1],tolower)
-      
-      min_spl <- min_split[which(min_split[,1] == allele1_deme), which(colnames(min_split) == allele2_deme)]
-    } else {
-      min_spl <- min_split
-    }
-    
-    if (class(max_split) == 'data-frame') {
-      colnames(max_split) <- lapply(colnames(max_split),tolower)
-      max_split[,1] <- sapply(max_split[,1],tolower)
-      
-      max_spl <- max_split[which(max_split[,1] == allele1_deme), which(colnames(max_split) == allele2_deme)]
-    } else {
-      max_spl <- max_split
-    }
-    
-    minimum_dist <- subset(x, distance_between >= min_spl)
-    maximum_dist <- subset(x, distance_between <= max_spl)
+    # get min and max distances according to deme
+    min_spl <- getSplitTime(min_split, allele1_deme, allele2_deme)
+    max_spl <- getSplitTime(max_split, allele1_deme, allele2_deme)
 
+    # subset by min and max distances
+    minimum_dist <- subset(dist_mrca_df, distance_between >= min_spl)
+    maximum_dist <- subset(dist_mrca_df, distance_between <= max_spl)
+
+    # determine mins and maxs 
     if (nrow(minimum_dist) == 0) {
       cat("WARNING: Minimum split time specified is too ancient (too high), no MRCA found for: ", allele, " and ", other_alleles[i], '\n')
-      min_data_dist[[j]] <- 'NA'
-      min_data_start[[j]] <- 'NA'
-      min_data_end[[j]] <- 'NA'
-      min_data_sites[[j]] <- 'NA'
-      min_data_mrca[[j]] <- 'NA'
-    } else {
-      min_dist <- min(minimum_dist$distance_between)
-      min_indices <- which(minimum_dist$distance_between == min_dist)
-      
-      min_data_start <- list()
-      min_data_end <- list()
-      min_data_sites <- list()
-      min_data_mrca <- list()
-      for (j in 1:length(min_indices)) {
-        min_index <- min_indices[j]
-        
-        min_data_dist <- minimum_dist$distance_between[min_index]
-        min_data_start[[j]] <- minimum_dist$start_of_region[min_index]
-        min_data_end[[j]] <- minimum_dist$end_of_region[min_index]
-        min_data_sites[[j]] <- minimum_dist$num_sites_in_region[min_index]
-        min_data_mrca[[j]] <- minimum_dist$mrca[min_index]
-      }
     }
-    
+    min_list <- getDistancePerAllele(minimum_dist, min)
     
     if (nrow(maximum_dist) == 0) {
       cat("WARNING: Maximum split time specified is too recent (too low), no MRCA found for: ", allele, " and ", other_alleles[i], '\n')
-      max_data_dist[[j]] <- 'NA'
-      max_data_start[[j]] <- 'NA'
-      max_data_end[[j]] <- 'NA'
-      max_data_sites[[j]] <- 'NA'
-      max_data_mrca[[j]] <- 'NA'
-    } else {
-      max_dist<- max(maximum_dist$distance_between)
-      max_indices <- which(maximum_dist$distance_between == max_dist)
-      
-      max_data_start <- list()
-      max_data_end <- list()
-      max_data_sites <- list()
-      max_data_mrca <- list()
-      for (j in 1:length(max_indices)) {
-        max_index <- max_indices[j]
-        
-        max_data_dist <- maximum_dist$distance_between[max_index]
-        max_data_start[[j]] <- maximum_dist$start_of_region[max_index]
-        max_data_end[[j]] <- maximum_dist$end_of_region[max_index]
-        max_data_sites[[j]] <- maximum_dist$num_sites_in_region[max_index]
-        max_data_mrca[[j]] <- maximum_dist$mrca[max_index]
-      }
     }
+    max_list <- getDistancePerAllele(maximum_dist, max)
     
-    total_df[i,] <- c(allele, other_alleles[i], allele1_deme, allele2_deme,
-                    min_data_dist,
-                    paste(min_data_start,collapse = ','),
-                    paste(min_data_end,collapse = ','),
-                    paste(min_data_sites,collapse = ','),
-                    paste(min_data_mrca,collapse = ','),
-                    max_data_dist,
-                    paste(max_data_start,collapse = ','),
-                    paste(max_data_end,collapse = ','),
-                    paste(max_data_sites,collapse = ','),
-                    paste(max_data_mrca,collapse = ',')
+    total_df[i,] <- c(allele, allele2, allele1_deme, allele2_deme,
+                    min_list[[1]],
+                    paste(min_list[[2]], collapse = ','),
+                    paste(min_list[[3]], collapse = ','),
+                    paste(min_list[[4]], collapse = ','),
+                    paste(min_list[[5]], collapse = ','),
+                    max_list[[1]],
+                    paste(max_list[[2]], collapse = ','),
+                    paste(max_list[[3]], collapse = ','),
+                    paste(max_list[[4]], collapse = ','),
+                    paste(max_list[[5]], collapse = ',')
                     )
   }
   as.data.frame(total_df)
 }
 
+
+#' Get Deme Indetifier (internal)
+#'
+#' @param min_split either 1) data frame containing identical row and column names for deme identifiers OR 2) an integer to specify min split limits for all species
+#' @param allele allele name
+#'
+#' @return the deme identifier for that allele
+#' @export
+#'
+#' @examples
+getDemeIdentifier <- function(min_split, allele) {
+  if (class(min_split) == 'data.frame') {
+    demes_available <- colnames(min_split)[2:length(colnames(min_split))]
+    allele_deme <- 'human'
+    
+    for (deme in demes_available) {
+      if (grepl(tolower(deme), allele, ignore.case = T)) {
+        allele_deme <- tolower(deme)
+        break
+      }
+    }
+  } else {
+    if (grepl('gogo', allele, ignore.case = T)) {
+      allele_deme <- 'gogo'
+    } else if (grepl('popy', allele, ignore.case = T)) {
+      allele_deme <- 'popy'
+    } else if (grepl('patr', allele, ignore.case = T)) {
+      allele_deme <- 'patr'
+    } else if (grepl('poab', allele, ignore.case = T)) {
+      allele_deme <- 'poab'
+    } else if (grepl('papa', allele, ignore.case = T)) {
+      allele_deme <- 'papa'
+    } else {
+      allele_deme <- 'human'
+    }
+  }
+  return(allele_deme)
+}
+
+
+#' Get Distance Per Allele (internal)
+#'
+#' @param subsetted_matrix matrix for all the trees for one allele pair
+#' @param limit_func either max or min
+#'
+#' @return a list with either all max or all min statistics
+#' @export
+#'
+#' @examples
+getDistancePerAllele <- function(subsetted_matrix, limit_func) {
+  if (nrow(subsetted_matrix) == 0) {
+    data_dist[[j]] <- 'NA'
+    data_start[[j]] <- 'NA'
+    data_end[[j]] <- 'NA'
+    data_sites[[j]] <- 'NA'
+    data_mrca[[j]] <- 'NA'
+  } else {
+    dist<- limit_func(subsetted_matrix$distance_between)
+    indices <- which(subsetted_matrix$distance_between == dist)
+    
+    data_start <- list()
+    data_end <- list()
+    data_sites <- list()
+    data_mrca <- list()
+    for (j in 1:length(indices)) {
+      index <- indices[j]
+      
+      data_dist <- subsetted_matrix$distance_between[index]
+      data_start[[j]] <- subsetted_matrix$start_of_region[index]
+      data_end[[j]] <- subsetted_matrix$end_of_region[index]
+      data_sites[[j]] <- subsetted_matrix$num_sites_in_region[index]
+      data_mrca[[j]] <- subsetted_matrix$mrca[index]
+    }
+  }
+  return(list(data_dist,data_start,data_end,data_sites,data_mrca))
+}
+
+
+#' Get Split Time
+#'
+#' @param split_data matrix containing split times or a numeric
+#' @param deme1 allele 1 deme
+#' @param deme2 allele 2 deme
+#'
+#' @return
+#' @export
+#'
+#' @examples
+getSplitTime <- function(split_data, deme1, deme2) {
+  if (class(split_data) == 'data-frame') {
+    colnames(split_data) <- lapply(colnames(split_data),tolower)
+    split_data[,1] <- sapply(split_data[,1],tolower)
+    
+    max_spl <- split_data[which(split_data[,1] == deme1), which(colnames(split_data) == deme2)]
+  } else {
+    max_spl <- split_data
+  }
+}
 ###########
 
 suppressWarnings(library(argparse, quietly=TRUE))
@@ -225,10 +221,8 @@ parser <- ArgumentParser(description = "Single Allele Information Parser")
 parser$add_argument("allele", nargs = 1, help="Allele Name")
 parser$add_argument("output", help="output file")
 
-parser$add_argument("--min_split", help="Matrix specifying minimum allowable
-                                         time for a MRCA to occur (tab separated)")
-parser$add_argument("--max_split", help="Matrix specifying maximum allowable
-                                         time for a MRCA to occur (tab separated)")
+parser$add_argument("--min_split", help="Matrix specifying minimum allowable time for a MRCA to occur (tab separated)")
+parser$add_argument("--max_split", help="Matrix specifying maximum allowable time for a MRCA to occur (tab separated)")
 parser$add_argument("--rdata", action="store_true",
                     help="path to treeList.RData [defaults to ./treeList.RData]",
                     default='./treeList.RData')
