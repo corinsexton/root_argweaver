@@ -68,7 +68,7 @@ parser <- ArgumentParser(description = "Pairwise Allele Information Parser")
 parser$add_argument("haplotype1", nargs = 1, help="Haplotype 1")
 parser$add_argument("haplotype2", nargs = 1, help="Haplotype 2")
 parser$add_argument("output", help="output file")
-parser$add_argument("--rdata", action="store_true",
+parser$add_argument("--rdata", 
                     help="path to treeList.RData [defaults to ./treeList.RData]",
                     default='./treeList.RData')
 
