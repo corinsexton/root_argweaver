@@ -298,7 +298,7 @@ parser$add_argument("output", help="output file")
 
 parser$add_argument("--min_split", help="Matrix specifying minimum allowable time for a MRCA to occur (tab separated)")
 parser$add_argument("--max_split", help="Matrix specifying maximum allowable time for a MRCA to occur (tab separated)")
-parser$add_argument("--rdata", action="store_true",
+parser$add_argument("--rdata", 
                     help="path to treeList.RData [defaults to ./treeList.RData]",
                     default='./treeList.RData')
 
