@@ -55,8 +55,10 @@ This script creates 'treeList.RData' which holds distance and MRCA matrices for 
 ##### `get_pairwise_information.R`
 This script uses 'treeList.Rdata' to query all trees for information of a specific 2-allele relationship. It outputs a tab-separated file with each row containing the start and stop regions of a tree, the number of variant sites in that tree's region, the distance between the two alleles in that tree, and the MRCA node number for the two alleles in that tree. Usage:  
      `Rscript get_pairwise_information.R [opt: path to treeList.RData] <haplotype 1> <haplotype 2> <output file name>`
+Example:
+     `Rscript get_pairwise_information.R --rdata ./HLA-C/treeList.RData C_01:01:01 C_01:02:01 C_comparison.tsv`
      
-##### `get_pairwise_information.R`
+##### `get_single_allele_information.R`
 This script uses 'treeList.Rdata' to query all trees for information for one allele in relation to all other alleles. It outputs a tab-separated file with each row containing for all other alleles :
   1. first allele id
   2. second allele id
