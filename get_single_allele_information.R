@@ -265,8 +265,6 @@ getDemeIdentifier <- function(min_split, allele) {
 }
 
 
-
-
 #' Get Split Time
 #'
 #' @param split_data matrix containing split times or a numeric

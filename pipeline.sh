@@ -41,16 +41,22 @@ echo "finished fasta2sites" > pipeline.log
 
 #### RUN ARGWEAVER
 
+echo -e "arg sample command run:
+      \targ-sample --sites $output_label.sites \
+	   -o $output_label \
+	   --overwrite \
+	   ${@:3}" >> pipeline.log
 arg-sample --sites $output_label.sites \
 	   -o $output_label \
 	   --overwrite \
 	   ${@:3} \
 	   | tee $output_label.log
-echo -e "arg sample command run:\n
-      \targ-sample --sites $output_label.sites \\n
-	   -o $output_label \\n
-	   --overwrite \\n
-	   ${@:3}" >> pipeline.log
+if [ $? -ne 0 ]
+then
+	echo "arg-sample sample failed" >> pipeline.log
+	exit 1
+fi
+
 echo "finished arg-sample" >> pipeline.log
 
 ####
