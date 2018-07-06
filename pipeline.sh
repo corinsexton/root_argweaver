@@ -50,7 +50,7 @@ arg-sample --sites $output_label.sites \
 	   -o $output_label \
 	   --overwrite \
 	   ${@:3} \
-	   | tee $output_label.log
+	   &>  ${output_label}_argweaver.log
 if [ $? -ne 0 ]
 then
 	echo "arg-sample sample failed" >> pipeline.log
