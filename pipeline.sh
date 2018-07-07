@@ -27,8 +27,6 @@ else
 	exit 1
 fi
 
-echo "started at `date`" > pipeline.log
-echo "command: $@" >> pipeline.log
 
 sed -e 's/-/N/g' $1 > $output_label.fasta # replace - with N
 sed -i -e 's/*/_/g' $output_label.fasta # replace * with _
@@ -37,6 +35,8 @@ sed -i -e 's/*/_/g' $output_label.fasta # replace * with _
 mkdir $output_label
 cd $output_label
 
+echo "started at `date`" > pipeline.log
+echo "command: $@" >> pipeline.log
 # convert aligned fasta to a sites file (used as argweaver input)
 python ../fasta2sites.py ../$output_label.fasta $output_label.sites
 echo "finished fasta2sites at `date`" >> pipeline.log
