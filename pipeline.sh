@@ -27,6 +27,9 @@ else
 	exit 1
 fi
 
+echo "started at `date`" > pipeline.log
+echo "command: $@" >> pipeline.log
+
 sed -e 's/-/N/g' $1 > $output_label.fasta # replace - with N
 sed -i -e 's/*/_/g' $output_label.fasta # replace * with _
 
@@ -36,7 +39,7 @@ cd $output_label
 
 # convert aligned fasta to a sites file (used as argweaver input)
 python ../fasta2sites.py ../$output_label.fasta $output_label.sites
-echo "finished fasta2sites" > pipeline.log
+echo "finished fasta2sites at `date`" >> pipeline.log
 ####
 
 #### RUN ARGWEAVER
@@ -53,11 +56,11 @@ arg-sample --sites $output_label.sites \
 	   &>  ${output_label}_argweaver.log
 if [ $? -ne 0 ]
 then
-	echo "arg-sample sample failed" >> pipeline.log
+	echo "arg-sample sample failed at `date`" >> pipeline.log
 	exit 1
 fi
 
-echo "finished arg-sample" >> pipeline.log
+echo "finished arg-sample at `date`" >> pipeline.log
 
 ####
 
@@ -66,8 +69,8 @@ echo "finished arg-sample" >> pipeline.log
 
 SMC_file=$output_label.1000.smc.gz
 #Rscript ../pairwise_parser.R $SMC_file $output_label.min_dist_matrix.tsv
-Rscript ../smc_parser.R $SMC_file $output_label.sites
-echo "finished smc_parser" >> pipeline.log
+Rscript ../smc_parser.R $SMC_file $output_label.sites >> pipeline.log 2>&1
+echo "finished smc_parser at `date`" >> pipeline.log
 
 ####
 
@@ -79,4 +82,5 @@ mv *smc.gz smc_files_$output_label
 
 ####
 
-echo "FINISHED! Data file is found at treeList.RData" >> pipeline.log
+echo "FINISHED AT `date`. Data file is found at treeList.RData" >> pipeline.log
+echo "Data file is found at treeList.RData" >> pipeline.log
