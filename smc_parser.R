@@ -57,7 +57,7 @@ for (num in 1:nrow(trees)) {
                           node_info = nodeList,
                           node_label_ordering = ordering)
   
-  if (i == nrow(trees)) cat(': Done')
+  if (num == nrow(trees)) cat(': Done')
   else cat('\014')
 }
 
