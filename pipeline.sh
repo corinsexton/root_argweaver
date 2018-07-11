@@ -28,17 +28,18 @@ else
 fi
 
 
-sed -e 's/-/N/g' $1 > $output_label.fasta # replace - with N
-sed -i -e 's/*/_/g' $output_label.fasta # replace * with _
-
 # make output directory and cd to that location
 mkdir $output_label
 cd $output_label
 
+sed -e 's/-/N/g' $1 > $output_label.fasta # replace - with N
+sed -i -e 's/*/_/g' $output_label.fasta # replace * with _
+
 echo "started at `date`" > pipeline.log
 echo "command: $@" >> pipeline.log
+
 # convert aligned fasta to a sites file (used as argweaver input)
-python ../fasta2sites.py ../$output_label.fasta $output_label.sites
+python ../fasta2sites.py $output_label.fasta $output_label.sites
 echo "finished fasta2sites at `date`" >> pipeline.log
 ####
 
