@@ -32,8 +32,8 @@ fi
 mkdir $output_label
 cd $output_label
 
-sed -e 's/-/N/g' $1 > ../$output_label.fasta # replace - with N
-sed -i -e 's/*/_/g' ../$output_label.fasta # replace * with _
+sed -e 's/-/N/g' ../$1 > ../$output_label.fasta # replace - with N
+sed -i -e 's/*/_/g' /$output_label.fasta # replace * with _
 
 echo "started at `date`" > pipeline.log
 echo "command: $@" >> pipeline.log
