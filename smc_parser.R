@@ -34,7 +34,6 @@ nodeList <- list()
 treeList <- list()
 
 for (num in 1:nrow(trees)) {
-  cat(paste0(round(num / nrow(trees) * 100), '% completed'))
   
   tree <-read.tree(text = trees[num,3] )
 
@@ -57,8 +56,6 @@ for (num in 1:nrow(trees)) {
                           node_info = nodeList,
                           node_label_ordering = ordering)
   
-  if (num == nrow(trees)) cat(': Done')
-  else cat('\014')
 }
 
 save(treeList, labels, file = "treeList.RData")
