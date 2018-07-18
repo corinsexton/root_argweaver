@@ -29,7 +29,11 @@ fi
 
 
 # make output directory and cd to that location
-mkdir $output_label
+if [ -d "$output_label" ]; then
+	echo "Overwriting existing directory $output_label with new run"
+else
+	mkdir $output_label
+fi
 cd $output_label
 
 sed -e 's/-/N/g' ../$1 > ../$output_label.fasta # replace - with N
