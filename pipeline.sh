@@ -73,7 +73,6 @@ echo "finished arg-sample at `date`" >> pipeline.log
 #### COMPUTE PAIRWISE DISTANCES AND ADD CORRECT LABELS
 
 SMC_file=$output_label.1000.smc.gz
-#Rscript ../pairwise_parser.R $SMC_file $output_label.min_dist_matrix.tsv
 Rscript ../smc_parser.R $SMC_file $output_label.sites >> pipeline.log 2>&1
 echo "finished smc_parser at `date`" >> pipeline.log
 
